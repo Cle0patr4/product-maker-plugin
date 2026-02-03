@@ -1,0 +1,6 @@
+{
+  "stop": {
+    "script": "scripts/stop-hook.sh",
+    "description": "Intercepts exit attempts to continue product building loop"
+  }
+}
