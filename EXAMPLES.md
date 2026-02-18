@@ -2,9 +2,68 @@
 
 This file contains battle-tested prompts for different types of products.
 
+## NEW: QA Tester Examples
+
+### REST API with QA Testing
+
+```bash
+/product-maker:build-product "
+Build a REST API with auth and CRUD for tasks:
+
+Features:
+- User registration with email/password
+- JWT authentication
+- Task CRUD (create, read, update, delete)
+- Task filtering and pagination
+- Input validation
+
+Tech Stack:
+- Express.js + TypeScript
+- PostgreSQL + Prisma
+- JWT for auth
+- Zod for validation
+
+Requirements:
+- All endpoints documented
+- Error handling for all routes
+- Test coverage >80%
+
+Deploy to Railway.
+Output <promise>API_DEPLOYED</promise> when complete.
+" --max-iterations 60 --completion-promise "API_DEPLOYED" --test-every 2
+```
+
+**What happens:**
+- Iterations 1, 3, 5... → BUILDER implements features
+- Iterations 2, 4, 6... → TESTER tests and documents bugs
+- BUILDER fixes bugs before continuing
+- Loop won't complete if CRITICAL bugs are open
+
+### Quick Prototype (No Testing)
+
+```bash
+/product-maker:build-product "
+Build a landing page for my startup:
+- Hero with value proposition
+- Features section
+- Pricing table
+- Contact form
+Deploy to Vercel.
+Output <promise>LANDING_LIVE</promise>
+" --max-iterations 25 --completion-promise "LANDING_LIVE" --no-tester
+```
+
+**When to use `--no-tester`:**
+- Quick prototypes
+- Learning projects
+- When you'll test manually later
+- Time-sensitive demos
+
+---
+
 ## SaaS Applications
 
-### Project Management Tool
+### Project Management Tool (With QA)
 
 ```bash
 /product-maker:build-product "
@@ -49,10 +108,10 @@ Success Criteria:
 - README with setup instructions
 
 Output <promise>TASKFLOW_DEPLOYED</promise> when complete.
-" --max-iterations 150 --completion-promise "TASKFLOW_DEPLOYED"
+" --max-iterations 150 --completion-promise "TASKFLOW_DEPLOYED" --test-every 2
 ```
 
-### E-commerce Platform
+### E-commerce Platform (With Aggressive QA)
 
 ```bash
 /product-maker:build-product "
@@ -96,12 +155,12 @@ Completion:
 - Performance score >90 on Lighthouse
 
 Output <promise>SHOP_LIVE</promise> when ready.
-" --max-iterations 180 --completion-promise "SHOP_LIVE"
+" --max-iterations 180 --completion-promise "SHOP_LIVE" --test-every 2
 ```
 
 ## API Services
 
-### REST API for Mobile App
+### REST API for Mobile App (Comprehensive QA)
 
 ```bash
 /product-maker:build-product "
@@ -149,7 +208,7 @@ Success Criteria:
 - Performance: <100ms avg response time
 
 Output <promise>API_PRODUCTION_READY</promise> when complete.
-" --max-iterations 100 --completion-promise "API_PRODUCTION_READY"
+" --max-iterations 100 --completion-promise "API_PRODUCTION_READY" --test-every 2
 ```
 
 ## Automation Tools
@@ -203,12 +262,12 @@ Success Metrics:
 - Deployed with Docker Compose
 
 Output <promise>AUTOMATION_LIVE</promise> when deployed.
-" --max-iterations 200 --completion-promise "AUTOMATION_LIVE"
+" --max-iterations 200 --completion-promise "AUTOMATION_LIVE" --test-every 3
 ```
 
 ## Internal Tools
 
-### Admin Dashboard
+### Admin Dashboard (With QA)
 
 ```bash
 /product-maker:build-product "
@@ -253,12 +312,12 @@ Completion Criteria:
 - Test coverage >75%
 
 Output <promise>DASHBOARD_DEPLOYED</promise> when live.
-" --max-iterations 120 --completion-promise "DASHBOARD_DEPLOYED"
+" --max-iterations 120 --completion-promise "DASHBOARD_DEPLOYED" --test-every 2
 ```
 
 ## Mobile Applications
 
-### React Native App
+### React Native App (With QA)
 
 ```bash
 /product-maker:build-product "
@@ -302,12 +361,12 @@ Success Criteria:
 - README with build instructions
 
 Output <promise>APP_IN_BETA</promise> when published to beta.
-" --max-iterations 150 --completion-promise "APP_IN_BETA"
+" --max-iterations 150 --completion-promise "APP_IN_BETA" --test-every 3
 ```
 
 ## Migrations & Refactors
 
-### Framework Migration
+### Framework Migration (With Validation)
 
 ```bash
 /product-maker:build-product "
@@ -352,13 +411,12 @@ Output <promise>MIGRATION_COMPLETE</promise> when:
 - Tests at 100% passing
 - Deployed to staging
 - Documentation updated
-
-" --max-iterations 80 --completion-promise "MIGRATION_COMPLETE"
+" --max-iterations 80 --completion-promise "MIGRATION_COMPLETE" --test-every 2
 ```
 
 ## Quick Templates
 
-### Simple CRUD API
+### Simple CRUD API (With QA)
 
 ```bash
 /product-maker:build-product "
@@ -373,10 +431,10 @@ Build a simple CRUD API for [RESOURCE]:
 - Deploy to Railway
 
 Output <promise>API_DEPLOYED</promise> when live.
-" --max-iterations 50 --completion-promise "API_DEPLOYED"
+" --max-iterations 50 --completion-promise "API_DEPLOYED" --test-every 2
 ```
 
-### Landing Page
+### Landing Page (No QA - Quick)
 
 ```bash
 /product-maker:build-product "
@@ -392,7 +450,7 @@ Build a landing page for [PRODUCT]:
 - Deploy to Vercel
 
 Output <promise>LANDING_LIVE</promise> when deployed.
-" --max-iterations 40 --completion-promise "LANDING_LIVE"
+" --max-iterations 40 --completion-promise "LANDING_LIVE" --no-tester
 ```
 
 ### Chrome Extension
@@ -409,8 +467,20 @@ Build a Chrome extension for [FUNCTIONALITY]:
 - Published to Chrome Web Store (unlisted)
 
 Output <promise>EXTENSION_PUBLISHED</promise> when submitted.
-" --max-iterations 60 --completion-promise "EXTENSION_PUBLISHED"
+" --max-iterations 60 --completion-promise "EXTENSION_PUBLISHED" --test-every 3
 ```
+
+## Test Frequency Guide
+
+| Project Type | Recommended `--test-every` | Reason |
+|-------------|---------------------------|--------|
+| MVP/Prototype | `--no-tester` | Speed is priority |
+| Simple API | `2` | Catch bugs early |
+| SaaS Platform | `2` | Quality is critical |
+| E-commerce | `2` | Payment bugs are costly |
+| Migration | `2-3` | Verify behavior preserved |
+| Internal Tool | `3` | Balance speed/quality |
+| Landing Page | `--no-tester` | Low complexity |
 
 ## Tips for Writing Prompts
 
@@ -423,7 +493,7 @@ Output <promise>EXTENSION_PUBLISHED</promise> when submitted.
 7. **Include Error Handling**: Explicitly mention edge cases
 8. **Think Like a PM**: What would you put in a PRD?
 
-## Prompt Template
+## Prompt Template (With QA)
 
 ```bash
 /product-maker:build-product "
@@ -451,7 +521,7 @@ Success Criteria:
 - Criteria 3
 
 Output <promise>SPECIFIC_UNIQUE_PROMISE</promise> when complete.
-" --max-iterations [N] --completion-promise "SPECIFIC_UNIQUE_PROMISE"
+" --max-iterations [N] --completion-promise "SPECIFIC_UNIQUE_PROMISE" --test-every 2
 ```
 
 ---

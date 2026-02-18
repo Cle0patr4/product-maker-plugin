@@ -5,7 +5,7 @@ Build a complete product from idea to deployment in an autonomous loop.
 ## Usage
 
 ```bash
-/product-maker:build-product "<product description>" --max-iterations <N> --completion-promise "<completion text>" [--enable-reflection] [--checkpoint-interval <N>]
+/product-maker:build-product "<product description>" --max-iterations <N> --completion-promise "<completion text>" [OPTIONS]
 ```
 
 ## Parameters
@@ -15,12 +15,20 @@ Build a complete product from idea to deployment in an autonomous loop.
 - `--completion-promise`: Text that signals completion (e.g., "PRODUCT_DEPLOYED")
 - `--enable-reflection`: (Optional) Enable iteration logging and checkpoint validation for large projects
 - `--checkpoint-interval`: (Optional) Run full validation every N iterations (default: 10, requires --enable-reflection)
+- `--with-tester`: (Optional) Enable QA tester mode (default: enabled)
+- `--no-tester`: (Optional) Disable QA tester mode
+- `--test-every`: (Optional) Run tester every N iterations (default: 2)
 
 ## Examples
 
-### Basic Usage (Small Projects)
+### Basic Usage (With QA Tester - Default)
 ```bash
 /product-maker:build-product "Build a REST API with Express and MongoDB for user management" --max-iterations 50 --completion-promise "API_DEPLOYED"
+```
+
+### Without QA Tester (Original Behavior)
+```bash
+/product-maker:build-product "Build a simple landing page" --max-iterations 30 --completion-promise "DEPLOYED" --no-tester
 ```
 
 ### With Reflection Mode (Large Projects)
@@ -28,9 +36,9 @@ Build a complete product from idea to deployment in an autonomous loop.
 /product-maker:build-product "Build a SaaS dashboard for managing AI automation projects with user auth, project management, and billing integration" --max-iterations 150 --completion-promise "PRODUCTION_READY" --enable-reflection
 ```
 
-### Custom Checkpoint Interval
+### Custom Test Frequency
 ```bash
-/product-maker:build-product "Migrate 100 Vue components to React with full test coverage" --max-iterations 200 --completion-promise "MIGRATION_COMPLETE" --enable-reflection --checkpoint-interval 15
+/product-maker:build-product "Build a REST API with auth" --max-iterations 60 --completion-promise "API_LIVE" --test-every 3
 ```
 
 ## How It Works
@@ -44,9 +52,58 @@ Build a complete product from idea to deployment in an autonomous loop.
 
 The plugin will:
 - Work on the product iteratively
+- Alternate between BUILDER and TESTER roles (when tester enabled)
 - Attempt to exit when done
 - Stop hook blocks exit and feeds the prompt back
 - Repeat until completion promise is met or max iterations reached
+- Block completion if critical bugs are open (when tester enabled)
+
+## QA Tester Mode (NEW)
+
+When QA Tester is enabled (default), iterations alternate between two roles:
+
+### Builder Iterations (odd iterations)
+- Reads TESTLOG.md to see bugs from last test sweep
+- Fixes all CRITICAL bugs first, then MEDIUM bugs
+- Marks fixed bugs in TESTLOG.md with commit hash
+- Continues building features from the PRD
+
+### Tester Iterations (every N iterations, default: 2)
+- Does NOT build or fix anything
+- Runs all tests
+- Tries to break every feature with edge cases
+- Documents ALL findings in TESTLOG.md
+- Commits TESTLOG.md with bug counts
+
+### Safety Feature
+The loop will NOT complete even if the completion promise is found, if there are critical bugs open. This ensures quality before shipping.
+
+### TESTLOG.md Format
+```markdown
+## Test Sweep - Iteration {N} - {timestamp}
+
+### CRITICAL (bloqueantes)
+- [BUG-001] Description
+  - Steps to reproduce: ...
+  - Expected: ...
+  - Actual: ...
+  - File: path/to/file.ts:line
+
+### MEDIUM (deben arreglarse)
+- [BUG-002] Description
+
+### LOW (nice to fix)
+- [BUG-003] Description
+
+### PASSED
+- List of what works correctly
+
+### Coverage
+- Tests executed: X
+- Tests passing: Y
+- Tests failing: Z
+- Coverage estimated: N%
+```
 
 ## Reflection Mode
 
@@ -67,25 +124,26 @@ When `--enable-reflection` is enabled, the plugin creates a hybrid reflection sy
 
 ### When to Use Reflection Mode
 
-| Project Type | Iterations | Reflection | Checkpoint Interval |
-|--------------|------------|------------|---------------------|
-| Simple API | 30-50 | No | N/A |
-| Medium SaaS | 80-120 | Optional | 10 |
-| Large Platform | 150-250 | **Yes** | 10-15 |
-| Migration (100+ files) | 150+ | **Yes** | 15-20 |
+| Project Type | Iterations | Reflection | Tester | Test Every |
+|--------------|------------|------------|--------|------------|
+| Simple API | 30-50 | No | Yes | 2 |
+| Medium SaaS | 80-120 | Optional | Yes | 2-3 |
+| Large Platform | 150-250 | **Yes** | Yes | 2 |
+| Migration (100+ files) | 150+ | **Yes** | Yes | 3-4 |
 
 ### Files Created
 
 - `ITERATION-LOG.md` - Running log of each iteration's progress
 - `CHECKPOINT-REPORT.md` - Full validation reports at checkpoint intervals
+- `TESTLOG.md` - QA tester findings (when tester enabled)
 
 ## Best Practices
 
 **Write Specific Prompts:**
 
-❌ Bad: "Build a cool web app"
+Bad: "Build a cool web app"
 
-✅ Good: 
+Good:
 ```
 Build a debt collection automation platform with:
 - WhatsApp integration for automated messages
@@ -121,28 +179,34 @@ Output <promise>PRODUCTION_READY</promise> when:
 
 ## Safety Features
 
-- **Max Iterations**: Prevents infinite loops
+- **Max Iterations Limit**: Prevents infinite loops
 - **Completion Promise**: Exact string match to exit
 - **Session State**: Preserves progress across iterations
 - **Git Integration**: Auto-commits progress
 - **Error Recovery**: Continues after failures
+- **Critical Bug Block**: Won't complete with critical bugs open (tester mode)
 
 ## When to Use
 
-✅ Perfect for:
+Perfect for:
 - Building MVPs overnight
 - Migrating entire codebases
 - Implementing feature sets
 - Creating complete products
 - Automating repetitive dev work
 
-✅ Use `--enable-reflection` for:
+Use `--enable-reflection` for:
 - Projects with 50+ files
 - Projects requiring 100+ iterations
 - Complex integrations that need validation
 - Migrations where progress tracking is critical
 
-❌ Not ideal for:
+Use `--no-tester` for:
+- Quick prototypes where quality is less critical
+- Experimentation and learning projects
+- When you want maximum building speed
+
+Not ideal for:
 - Quick one-off tasks
 - Tasks requiring human judgment
 - Debugging specific bugs
@@ -158,6 +222,11 @@ git log --oneline -10
 View current state file:
 ```bash
 cat .product-maker-state.yaml
+```
+
+Check QA status:
+```bash
+/product-maker:test-status
 ```
 
 ## Canceling
