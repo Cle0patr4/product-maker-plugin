@@ -1,0 +1,10 @@
+{
+  "name": "product-maker",
+  "version": "2.0.0-alpha.0",
+  "description": "Product Maker v2 — autonomous multi-agent product builder. Thin wrapper over @spicy/product-maker CLI.",
+  "author": {
+    "name": "Cle0patr4"
+  },
+  "commands": [],
+  "hooks": []
+}

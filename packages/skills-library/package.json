@@ -1,0 +1,24 @@
+{
+  "name": "@spicy/skills-library",
+  "version": "2.0.0-alpha.0",
+  "description": "Reusable Anthropic Skills for Product Maker projects (stack knowledge + visual-qa).",
+  "private": false,
+  "type": "module",
+  "files": [
+    "skills",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "claude",
+    "anthropic",
+    "skills",
+    "product-maker"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@spicy/product-maker-plugin",
+  "version": "2.0.0-alpha.0",
+  "description": "Claude Code plugin wrapping the Product Maker engine. Thin slash-command layer over @spicy/product-maker.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "product-maker"
+  ],
+  "license": "MIT"
+}

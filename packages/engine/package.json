@@ -1,0 +1,42 @@
+{
+  "name": "@spicy/product-maker",
+  "version": "2.0.0-alpha.0",
+  "description": "Autonomous multi-agent product maker engine (v2). Builds on Claude Managed Agents.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "product-maker": "./bin/product-maker.mjs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "clean": "tsc -b --clean"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "claude",
+    "anthropic",
+    "managed-agents",
+    "autonomous",
+    "ai",
+    "product-maker"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

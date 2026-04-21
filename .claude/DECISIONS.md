@@ -243,6 +243,29 @@
 
 ---
 
+## ADR-012: Leave v1 files at repo root during transition (don't move to `v1/`)
+
+**Status**: Accepted (2026-04-21)
+
+**Context**: Phase 1 scaffolding flagged a decision: do we move the v1 bash plugin (`commands/`, `hooks/`, `scripts/`, `.claude-plugin/`) into a `v1/` subfolder so v2 can grow cleanly under `packages/`, or leave v1 in place?
+
+**Decision**: Leave v1 files at repo root, untouched. v2 lives exclusively under `packages/`. When v2 is functionally complete and published, a single major-version commit deletes v1 from `main` (and `v1-legacy` branch retains it for posterity).
+
+**Consequences**:
+- (+) Zero risk of breaking existing v1 installs. Users who cloned or installed the plugin don't get surprised by moved paths.
+- (+) The `.claude-plugin/plugin.json` at root keeps resolving; Claude Code users with v1 installed keep working.
+- (+) Git history stays clean — no mass rename commit to wade through.
+- (+) Hard constraint enforced by CLAUDE.md: Claude sessions working on v2 know v1 paths are frozen.
+- (-) Repo root looks "two projects at once" for the duration of the transition (4-6 weeks estimated).
+- (-) `README.md` at root is still the v1 README; v2 README is deferred to Phase 8. Mitigated by a banner at the top pointing at `CLAUDE.md`.
+
+**Alternatives considered**:
+- Move v1 to `v1/` subfolder immediately — rejected. Breaks existing plugin installs (path to `hooks/hooks.json`, commands, etc. all change). No upside beyond visual cleanliness.
+- Delete v1 now and build v2 in-place on `main` — rejected. v1 users exist and v2 is months of work away from feature parity + publish.
+- Separate monorepo just for v2 — already rejected in ADR-011.
+
+---
+
 ## Template for new ADRs
 
 ```markdown

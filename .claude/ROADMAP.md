@@ -24,29 +24,26 @@ Phased plan for the v2 rewrite. Each phase has a clear goal, concrete deliverabl
 
 ---
 
-## Phase 1 — Monorepo transformation
+## Phase 1 — Monorepo transformation ✅ DONE
 
 **Goal**: repo layout ready for TypeScript code. No engine logic yet.
 
 **Deliverables**:
-- [ ] `packages/engine/` with its own `package.json`, `tsconfig.json`, `src/index.ts` (empty export)
-- [ ] `packages/skills-library/` with its own `package.json` + an initial `skills/` subfolder (empty)
-- [ ] `packages/plugin/` with its own `package.json` + `.claude-plugin/plugin.json` stub
-- [ ] Root `tsconfig.json` with references to all packages
-- [ ] `.gitignore` extended for `node_modules/`, `dist/`, `.turbo/`, etc.
-- [ ] Either: move v1 files into `v1/` subfolder, OR leave in place and document that v1 paths are frozen until v2 ships
-- [ ] `README.md` updated with a "v2 in progress" banner pointing to `CLAUDE.md`
-- [ ] `pnpm install` runs clean with zero warnings
+- [x] `packages/engine/` with its own `package.json`, `tsconfig.json`, `src/index.ts` (empty export)
+- [x] `packages/skills-library/` with its own `package.json` + an initial `skills/` subfolder (empty)
+- [x] `packages/plugin/` with its own `package.json` + `.claude-plugin/plugin.json` stub
+- [x] Root `tsconfig.json` + `tsconfig.base.json` with project references
+- [x] `.gitignore` extended for `node_modules/`, `dist/`, `.turbo/`, etc. (done in Phase 0)
+- [x] v1 files left at root (see ADR-012 — rationale documented)
+- [x] `README.md` updated with "v2 in progress" banner pointing to `CLAUDE.md`
+- [x] `pnpm install` runs clean
+- [x] `pnpm build` and `pnpm typecheck` both succeed
 
-**Decision point for this phase**:
-- **Do we move v1 files into a `v1/` subfolder, or leave them at root?**
-  - Moving: cleaner v2 layout, but v1 users running `npm install` of the plugin would break (plugin paths change).
-  - Leaving: paths preserved for v1 users, but root is cluttered during transition.
-  - **Recommendation**: leave v1 at root, develop v2 entirely under `packages/`. When v2 ships, the next major release deletes v1 entirely. Document this in `DECISIONS.md` as ADR-012 when the call is made.
+**Decision captured**: ADR-012 — leave v1 at root, v2 lives under `packages/`. Next major release deletes v1 from `main`; `v1-legacy` branch retains it for posterity.
 
-**Success criteria**: `pnpm build` succeeds (no-op across 3 empty packages). `pnpm typecheck` succeeds. v1 plugin still works if installed in Claude Code.
+**Success criteria met**: `pnpm build` + `pnpm typecheck` pass on a fresh clone. v1 plugin still installable (paths unchanged).
 
-**Estimated effort**: 1 session.
+**Actual effort**: <1 session (same session as Phase 0).
 
 ---
 

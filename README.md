@@ -1,5 +1,7 @@
 # Product Maker Plugin for Claude Code
 
+> **⚠️ v2 in progress.** This README documents **v1.1.0**, the bash-based Claude Code plugin (current stable). A full TypeScript + Managed Agents rewrite is underway at `packages/`. Roadmap and design live in [`CLAUDE.md`](./CLAUDE.md) and [`.claude/`](./.claude/). v1 code in `commands/`, `hooks/`, and `scripts/` is frozen until v2 ships; the `v1-legacy` branch pins the last v1-only commit as a safety net.
+
 **Ship complete, tested products while you sleep**
 
 An autonomous development loop plugin that transforms ideas into deployed products through iterative AI-driven development. Based on the Ralph Wiggum technique but optimized specifically for building complete applications from scratch.
