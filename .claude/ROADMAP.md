@@ -47,39 +47,45 @@ Phased plan for the v2 rewrite. Each phase has a clear goal, concrete deliverabl
 
 ---
 
-## Phase 2 — Engine MVP (local scaffolding, no API calls yet)
+## Phase 2 — Engine MVP (local scaffolding, no API calls yet) ✅ DONE
 
 **Goal**: the CLI skeleton works — it accepts commands, reads/writes state, logs structured events. No Anthropic API calls yet.
 
 **Deliverables** (all in `packages/engine/`):
-- [ ] `src/cli.ts` — entry point. Commands: `init`, `build`, `status`, `watch`, `cancel`.
-- [ ] `src/config.ts` — loads and validates `product-maker.config.ts` with Zod schema.
-- [ ] `src/state.ts` — read/write `.product-maker/state.json` (type-safe schema).
-- [ ] `src/logger.ts` — structured logging to `.product-maker/logs/stream.log` + console.
-- [ ] `src/commands/init.ts` — scaffolds `.product-maker/`, config, placeholder CLAUDE.md.
-- [ ] `src/commands/build.ts` — **stub**: prints "would start loop" and exits.
-- [ ] `src/commands/status.ts` — reads state, prints summary.
-- [ ] `src/commands/watch.ts` — **stub**: tails log file.
-- [ ] `src/commands/cancel.ts` — **stub**: marks state as cancelled.
-- [ ] `bin/product-maker.mjs` — shebang executable, maps to `dist/cli.js`.
-- [ ] Tests with Vitest — at least one test per command (happy path).
+- [x] `src/cli.ts` — commander entry point. Commands: `init`, `build`, `status`, `watch`, `cancel`.
+- [x] `src/config.ts` — loads and validates `product-maker.config.{json,mjs,js}` with Zod.
+- [x] `src/state.ts` — read/write `.product-maker/state.json` (Zod-validated schema v1).
+- [x] `src/logger.ts` — structured JSON-lines logging to `.product-maker/logs/stream.log` + colored console.
+- [x] `src/commands/init.ts` — scaffolds `.product-maker/`, config, placeholder `CLAUDE.md`.
+- [x] `src/commands/build.ts` — **stub**: loads config, prints summary, exits (Phase 3 replaces).
+- [x] `src/commands/status.ts` — reads state, prints summary + `--json` flag.
+- [x] `src/commands/watch.ts` — static tail of stream.log (live SSE tail in Phase 3).
+- [x] `src/commands/cancel.ts` — marks state `cancelled: true` (Phase 3 adds `user.interrupt`).
+- [x] `bin/product-maker.mjs` — shebang executable wrapping `dist/cli.js`.
+- [x] Vitest suite — 21 tests across config, state, and all 5 commands.
 
-**Dependencies to add**:
-- `@anthropic-ai/sdk` (will be used in Phase 3)
-- `zod` for schemas
-- `commander` or `citty` for CLI parsing
-- `chalk` for terminal colors
-- `ora` for spinners
-- `execa` for spawning subprocesses (v2 still needs `git` at times)
-- Dev: `vitest`, `tsup` (bundler), `@types/node`
+**Dependencies added**:
+- `@anthropic-ai/sdk@^0.90.0` (used in Phase 3)
+- `zod@^4`
+- `commander@^14`
+- `chalk@^5`
+- `ora@^9`
+- `execa@^9`
+- Dev: `vitest@^4`
 
-**Success criteria**:
-- `npx @spicy/product-maker init` in a temp dir creates `.product-maker/`, `product-maker.config.ts`, `CLAUDE.md` scaffolding
-- `npx @spicy/product-maker status` reads state and prints a summary
-- `npx @spicy/product-maker build` prints stub message
-- Tests pass
+Note: `tsup` from the original plan was skipped — plain `tsc -b` produces clean output without a bundler, and the CLI's deps stay external by design. Can revisit at publish time (Phase 8) if we want a single-file artifact.
 
-**Estimated effort**: 2-3 sessions.
+**Config format**: JSON-first in Phase 2 (`product-maker.config.json`). The loader also accepts `.mjs`/`.js` via dynamic import. A `.ts` variant can be added later with a loader shim.
+
+**Success criteria** (all met):
+- [x] `product-maker init` creates `.product-maker/`, `product-maker.config.json`, and `CLAUDE.md`
+- [x] `product-maker status` prints a formatted summary
+- [x] `product-maker build` prints the Phase 2 stub message
+- [x] `product-maker cancel` flips state to `cancelled` idempotently
+- [x] `product-maker watch -n N` tails the stream log
+- [x] `pnpm build`, `pnpm typecheck`, `pnpm test` all pass workspace-wide
+
+**Actual effort**: 1 session.
 
 ---
 
