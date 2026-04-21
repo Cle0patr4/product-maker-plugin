@@ -6,12 +6,21 @@ This file is the first thing any future Claude session should read when working 
 
 **Product Maker** is an autonomous multi-agent system that builds complete, tested, deployed products while the user sleeps. A user describes a product, kicks off the loop, and comes back hours later to a working PR.
 
-The repo is currently mid-transition between two major versions:
+The repo is mid-transition between two major versions:
 
 - **v1 (current `main`)**: a Claude Code plugin based on a single-Claude bash loop (Geoffrey Huntley's "Ralph Wiggum" technique). Stop-hook intercepts exit attempts and re-feeds the prompt. Works, shipped, v1.1.0.
-- **v2 (being designed)**: a multi-agent orchestration on top of **Claude Managed Agents** (Anthropic's hosted agent service). An Orchestrator agent (Opus 4.7) spawns Executor (Sonnet 4.6) and Tester (Opus 4.7 + Playwright + vision) sub-sessions via custom tools. TypeScript monorepo. Published as npm package + thin Claude Code plugin.
+- **v2 (in active development)**: a multi-agent orchestration on top of **Claude Managed Agents** (Anthropic's hosted agent service). An Orchestrator agent (Opus 4.7) spawns Executor (Sonnet 4.6) and Tester (Opus 4.7 + Playwright + vision) sub-sessions via custom tools. TypeScript monorepo. Published as npm package + thin Claude Code plugin.
 
-v1 code is preserved in branch `v1-legacy` and still lives in `main` until v2 replaces it.
+**Phase progress** (see `.claude/ROADMAP.md` for full detail):
+- ✅ Phase 0 — Foundation docs
+- ✅ Phase 1 — Monorepo transformation (`packages/{engine,skills-library,plugin}`)
+- ✅ Phase 2 — Engine MVP (local CLI, no API calls — `init`/`status`/`build`/`watch`/`cancel`, 21 Vitest tests passing)
+- ⏭ Phase 3 — Managed Agents integration (**next up**)
+- ⬜ Phases 4-8 — Visual QA, skills library, plugin wrapper, E2E, publish
+
+v1 code is preserved in branch `v1-legacy` and still lives at the repo root. It will not be deleted until v2 ships.
+
+**Active development branch**: `claude/read-understand-repo-r0JSG`. Do not push v2 work to `main` until Phase 8.
 
 ## Read this first, then dive deeper
 
@@ -38,18 +47,38 @@ Humans looking for product docs should go to `README.md`, `PROJECT-OVERVIEW.md`,
 | `scripts/cancel-loop.sh` | Deactivates the loop |
 | `scripts/test-status.sh` | Parses TESTLOG.md |
 
-### v2 artifacts (to be created)
-
-Target structure, set up incrementally during Phase 1 of the roadmap:
+### v2 artifacts (existing — Phase 2 complete)
 
 ```
 packages/
-├── engine/              # @spicy/product-maker — the TypeScript CLI + orchestrator
-├── skills-library/      # reusable skills (nextjs-supabase, visual-qa, ...)
-└── plugin/              # thin Claude Code plugin wrapping the engine
+├── engine/                    @spicy/product-maker (TypeScript CLI)
+│   ├── bin/product-maker.mjs  shebang entry → dist/cli.js
+│   ├── src/
+│   │   ├── cli.ts             commander entry, 5 commands
+│   │   ├── config.ts          Zod schema for product-maker.config.{json,mjs,js}
+│   │   ├── state.ts           Zod schema for .product-maker/state.json
+│   │   ├── logger.ts          JSON-lines → stream.log + colored console
+│   │   ├── index.ts           public API surface
+│   │   └── commands/{init,build,status,watch,cancel}.ts
+│   ├── tests/                 21 Vitest tests (helpers.ts + 7 test files)
+│   ├── tsconfig.json          composite, emits to dist/
+│   ├── tsconfig.test.json     noEmit, includes src + tests
+│   └── vitest.config.ts
+├── skills-library/            @spicy/skills-library (empty — filled in Phases 4-5)
+└── plugin/                    @spicy/product-maker-plugin (stub — filled in Phase 6)
 ```
 
-`package.json` + `pnpm-workspace.yaml` at root.
+Root: `package.json` (workspaces), `pnpm-workspace.yaml`, `tsconfig.base.json`, `tsconfig.json` (project references), `pnpm-lock.yaml`.
+
+**Engine commands wired (Phase 2)** — all functional, but `build` / `watch` / `cancel` are deliberately partial stubs until Phase 3 plugs in Managed Agents:
+
+| Command | Phase 2 behavior | Phase 3 upgrade |
+|---|---|---|
+| `init` | Real. Scaffolds `.product-maker/`, `product-maker.config.json`, `CLAUDE.md` | Also creates 3 Managed Agents + environment, persists IDs |
+| `status` | Real. Reads state, pretty-prints (supports `--json`) | Unchanged |
+| `build` | Stub. Loads config + prints summary | Opens SSE session, spawns Orchestrator, handles custom tools |
+| `watch` | Static tail of `stream.log` (last N lines) | Live SSE reconnect with lossless replay |
+| `cancel` | Flips `state.cancelled = true` (idempotent) | Also sends `user.interrupt` to live session |
 
 ## Key conventions
 
@@ -77,6 +106,43 @@ packages/
 - `CLAUDE.md` in a user's project = product spec + cross-session memory for their project (different file, same name — don't confuse with *this* CLAUDE.md)
 - `TESTLOG.md` = QA findings, append-only, severity-tagged
 - Commits should be atomic and descriptive. No "wip" / "fix" / "update" commits.
+
+## Working on the v2 engine locally
+
+All commands run from repo root unless noted.
+
+```bash
+# One-time setup
+pnpm install
+
+# Edit code in packages/engine/src/ or tests in packages/engine/tests/
+
+# Type-check everything (src + tests)
+pnpm typecheck
+
+# Build (tsc -b emits to packages/engine/dist/)
+pnpm build
+
+# Run the test suite
+pnpm test
+
+# Smoke-test the CLI against a throwaway directory
+SMOKE=$(mktemp -d)
+node packages/engine/bin/product-maker.mjs -C "$SMOKE" init --name demo --stack nextjs-supabase
+node packages/engine/bin/product-maker.mjs -C "$SMOKE" status
+node packages/engine/bin/product-maker.mjs -C "$SMOKE" status --json
+rm -rf "$SMOKE"
+```
+
+**Editing the CLI**: after any change under `packages/engine/src/`, run `pnpm build` before re-invoking the bin script — the bin imports `dist/`, not `src/`. Vitest runs directly against `src/` so tests don't need a rebuild.
+
+**Adding a dependency to engine**: `pnpm --filter @spicy/product-maker add <pkg>` (runtime) or `... add -D <pkg>` (dev).
+
+**TypeScript strictness**: `tsconfig.base.json` has `exactOptionalPropertyTypes: true` and `verbatimModuleSyntax: true`. Concretely:
+- Use `import type` for type-only imports, `import` for values
+- Don't assign `undefined` to `field?: T` — omit the field instead, or use `field: T | null` if nullability is semantic
+
+**Schemas**: state and config go through Zod at every read (`StateSchema.parse` / `ConfigSchema.safeParse`). If you change the shape, bump `schemaVersion` in `state.ts` and add a migration path before merging.
 
 ## How v2 will be used (end-to-end)
 
@@ -133,8 +199,12 @@ Orchestrator uses custom tools (`spawn_executor`, `spawn_tester`) that your CLI 
 
 ## If you're stuck
 
+- "What phase? What next?" → `.claude/STATUS.md`
+- Full phased plan → `.claude/ROADMAP.md`
 - Architecture question → `.claude/ARCHITECTURE.md`
 - "Why did we choose X?" → `.claude/DECISIONS.md`
-- "What's next?" → `.claude/STATUS.md`
-- Managed Agents SDK details → invoke the `claude-api` skill (`/claude-api managed-agents-onboard`)
+- Managed Agents SDK details (for Phase 3) → invoke the `claude-api` skill (`/claude-api managed-agents-onboard`)
+- Engine code layout / CLI entry → `packages/engine/src/cli.ts` (commander setup)
+- Config or state shape → `packages/engine/src/{config,state}.ts` (Zod schemas are the source of truth)
+- "How do I add a command?" → copy a file from `packages/engine/src/commands/`, register it in `cli.ts`, add a test in `tests/`
 - v1 behavior clarification → read `scripts/stop-hook.sh` top-to-bottom
