@@ -1,0 +1,43 @@
+# Node / pnpm
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Product Maker runtime (user-project artifacts — do NOT commit inside this repo)
+.product-maker/
+.product-maker-state.yaml
+
+# TypeScript / test
+coverage/
+.nyc_output/
+
+# Turbo / Nx / etc (future)
+.turbo/
+.nx/
