@@ -2,9 +2,9 @@
 
 > This file is short on purpose. Keep it updated as work progresses. Detailed plan is in `ROADMAP.md`.
 
-**Last updated**: 2026-04-21
-**Current branch**: `claude/read-understand-repo-r0JSG`
-**Current phase**: Phase 2 — Engine MVP ✅ **DONE**. Next up: Phase 3 — Managed Agents integration.
+**Last updated**: 2026-04-29
+**Current branch**: `main` (Phase 0-2 was merged via PR #1, commit `56593b2`, on 2026-04-21). Phase 3 work should open a new feature branch.
+**Current phase**: Phase 2 — Engine MVP ✅ **DONE** and end-to-end verified locally on 2026-04-29 (`pnpm install` / `typecheck` / `test` 21/21 / `build` / `init`+`status` smoke-test all green). Next up: Phase 3 — Managed Agents integration (not started).
 
 ---
 
@@ -52,7 +52,9 @@ Do NOT add visual QA yet — that's Phase 4.
 
 ## Recent changes (reverse chronological)
 
-- **2026-04-21** — **Phase 2 complete**: engine CLI with 5 commands, Zod-validated state + config, structured logger, 21 Vitest tests. This session.
+- **2026-04-29** — Fresh clone verified end-to-end on a new machine: `pnpm install` (4 workspaces, 91 pkgs), `pnpm typecheck`, `pnpm test` (21/21), `pnpm build` (dist emitted), and `init`+`status` smoke-test in a temp dir all pass. `.env` set up locally with `ANTHROPIC_API_KEY`. CLAUDE.md refreshed to mark current phase prominently.
+- **2026-04-21** — **PR #1 merged** (`56593b2`): Phase 0-2 work landed in `main`. Branch `claude/read-understand-repo-r0JSG` is no longer the active dev branch.
+- **2026-04-21** — **Phase 2 complete**: engine CLI with 5 commands, Zod-validated state + config, structured logger, 21 Vitest tests.
 - **2026-04-21** — Phase 1: monorepo scaffolding + project references + v2 banner + ADR-012.
 - **2026-04-21** — Foundation docs created (Phase 0). v1 preserved on branch `v1-legacy`.
 - **2026-04-21** — Design session: resolved v2 architecture. See `DECISIONS.md` for all 12 ADRs captured.
@@ -68,7 +70,7 @@ One thing to note for Phase 3 planning: the config format choice in Phase 2 was 
 
 ## Known blockers / risks
 
-- **No Anthropic API key available in this repo yet.** v2 requires `ANTHROPIC_API_KEY` set in user env. Becomes a hard blocker for Phase 3 smoke-tests.
+- **API key**: local dev has `ANTHROPIC_API_KEY` set in `.env` (gitignored, set 2026-04-29). CI has no key — Phase 3 integration tests must mock the SDK; manual smoke-tests against real Managed Agents are local-only.
 - **GitHub PAT for repo mounting.** Users of v2 will need a GitHub PAT with repo scope. Not a blocker for the code but affects local manual testing.
 - **Cost of v2 runs is non-trivial** ($30-80 per full project). Need cost guardrails (max iters, max $ cap) before public launch. Schema already has `costCapUsd` field — enforcement lands in Phase 3 or 7.
 - **Managed Agents is beta** (header `managed-agents-2026-04-01`). API shape could shift — pin beta header version and watch changelog.

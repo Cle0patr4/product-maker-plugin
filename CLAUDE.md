@@ -2,25 +2,30 @@
 
 This file is the first thing any future Claude session should read when working in this repo. It's written for Claude, not humans — humans have `README.md`.
 
+> ## 👉 Where we are right now
+>
+> - **Current phase**: ⏭ **Phase 3 — Managed Agents integration** (next up; not started)
+> - **Last completed**: ✅ Phase 2 — Engine MVP (21/21 Vitest tests passing, CLI scaffolding works)
+> - **Last verified locally**: **2026-04-29** — fresh clone on `main`: `pnpm install` / `typecheck` / `test` / `build` all green; `init`+`status` smoke-test in a temp dir works.
+> - **Canonical source of truth**: `.claude/STATUS.md` — read this BEFORE acting; it has the full "next action" checklist for Phase 3. If it disagrees with this file, STATUS.md wins.
+
 ## What this repo is
 
 **Product Maker** is an autonomous multi-agent system that builds complete, tested, deployed products while the user sleeps. A user describes a product, kicks off the loop, and comes back hours later to a working PR.
 
 The repo is mid-transition between two major versions:
 
-- **v1 (current `main`)**: a Claude Code plugin based on a single-Claude bash loop (Geoffrey Huntley's "Ralph Wiggum" technique). Stop-hook intercepts exit attempts and re-feeds the prompt. Works, shipped, v1.1.0.
+- **v1**: a Claude Code plugin based on a single-Claude bash loop (Geoffrey Huntley's "Ralph Wiggum" technique). Stop-hook intercepts exit attempts and re-feeds the prompt. Works, shipped, v1.1.0. Code still lives at the repo root and is preserved on branch `v1-legacy`.
 - **v2 (in active development)**: a multi-agent orchestration on top of **Claude Managed Agents** (Anthropic's hosted agent service). An Orchestrator agent (Opus 4.7) spawns Executor (Sonnet 4.6) and Tester (Opus 4.7 + Playwright + vision) sub-sessions via custom tools. TypeScript monorepo. Published as npm package + thin Claude Code plugin.
 
 **Phase progress** (see `.claude/ROADMAP.md` for full detail):
 - ✅ Phase 0 — Foundation docs
 - ✅ Phase 1 — Monorepo transformation (`packages/{engine,skills-library,plugin}`)
 - ✅ Phase 2 — Engine MVP (local CLI, no API calls — `init`/`status`/`build`/`watch`/`cancel`, 21 Vitest tests passing)
-- ⏭ Phase 3 — Managed Agents integration (**next up**)
+- ⏭ **Phase 3 — Managed Agents integration (← we are here, not started)**
 - ⬜ Phases 4-8 — Visual QA, skills library, plugin wrapper, E2E, publish
 
-v1 code is preserved in branch `v1-legacy` and still lives at the repo root. It will not be deleted until v2 ships.
-
-**Active development branch**: `claude/read-understand-repo-r0JSG`. Do not push v2 work to `main` until Phase 8.
+**Branch state**: Phase 0-2 work was merged into `main` via PR #1 (commit `56593b2`, 2026-04-21), so `main` now contains both v1 (root) and v2 (`packages/`) side-by-side. v1 code is preserved on branch `v1-legacy` and will not be deleted until v2 ships. Future v2 work (starting with Phase 3) should be done on a new feature branch — do not push WIP directly to `main` until Phase 8.
 
 ## Read this first, then dive deeper
 
